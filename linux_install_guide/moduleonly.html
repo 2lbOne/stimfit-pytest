@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Building the Python module only &#8212; Stimfit dev documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="../_static/documentation_options.js?v=81f007b9"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Building Stimfit" href="requirement.html" />
+    <link rel="prev" title="GNU/Linux Build Guide" href="index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="requirement.html" title="Building Stimfit"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="GNU/Linux Build Guide"
+             accesskey="P">previous</a> |</li>
+    <li><a href="http://github.com/neurodroid/stimfit/wiki/Stimfit">Stimfit Homepage</a> | &nbsp; </li>
+    <li><a href="http://github.com/neurodroid/stimfit" }}>Developer (Github)</a> | &nbsp; </li>
+    <li><a href=../index.html>Documentation Home</a> | &nbsp; </li>
+
+    
+
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">GNU/Linux Build Guide</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Building the Python module only</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="building-the-python-module-only">
+<h1>Building the Python module only<a class="headerlink" href="#building-the-python-module-only" title="Link to this heading">¶</a></h1>
+<dl class="field-list simple">
+<dt class="field-odd">Author<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Christoph Schmidt-Hieber</p>
+</dd>
+<dt class="field-even">Date<span class="colon">:</span></dt>
+<dd class="field-even"><p>29 March, 2026</p>
+</dd>
+</dl>
+<p>The standalone [<cite>stfio</cite>](doc/sphinx/stfio/index.rst) module is built from the
+same CMake source tree as the full application, but without the GUI target.
+The old autotools path is no longer supported on current [<cite>master</cite>](README.md:13).</p>
+<p>On Debian-based systems, install the core build requirements first:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ sudo apt-get install build-essential cmake ninja-build git \
+                       python3-dev python3-numpy swig \
+                       libhdf5-dev libfftw3-dev liblapack-dev
+</pre></div>
+</div>
+<p>If you want BioSig-backed import support in [<cite>stfio</cite>](doc/sphinx/stfio/index.rst),
+also install the distribution package:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ sudo apt-get install libbiosig-dev
+</pre></div>
+</div>
+<p>Then clone the repository:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ cd $HOME
+$ git clone https://github.com/neurodroid/stimfit.git
+</pre></div>
+</div>
+<p>That will create a directory called <em>stimfit</em>. Configure a dedicated module
+build directory from the repository root:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ cd $HOME/stimfit
+$ cmake -S . -B build/module -G Ninja \
+          -DSTF_BUILD_MODULE=ON \
+          -DSTF_ENABLE_PYTHON=ON \
+          -DSTF_BUILD_TESTS=OFF \
+          -DSTF_BUILD_NUMERIC_TESTS=OFF \
+          -DSTF_WITH_BIOSIG=ON
+</pre></div>
+</div>
+<p>If your system already provides <cite>libbiosig-dev</cite>, the default provider selection
+is usually sufficient. If you need to force the in-tree BioSig source on a
+non-packaged platform, you can additionally pass <cite>-DSTF_BIOSIG_PROVIDER=SUBMODULE</cite>.</p>
+<p>Build the module:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ cmake --build build/module
+</pre></div>
+</div>
+<p>To stage an install into a local prefix for inspection:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ cmake --install build/module --prefix $HOME/.local
+</pre></div>
+</div>
+<section id="building-stfio-for-non-default-python-distributions">
+<h2>Building stfio for non-default Python distributions<a class="headerlink" href="#building-stfio-for-non-default-python-distributions" title="Link to this heading">¶</a></h2>
+<p>To target a non-default Python 3 interpreter, point CMake at the interpreter
+you want it to use during configuration. For example, with a virtual
+environment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ cmake -S . -B build/module-venv -G Ninja \
+          -DSTF_BUILD_MODULE=ON \
+          -DSTF_ENABLE_PYTHON=ON \
+          -DPython3_EXECUTABLE=$HOME/venvs/stimfit/bin/python
+</pre></div>
+</div>
+<p>Then build and install into that environment or another target prefix:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ cmake --build build/module-venv
+$ cmake --install build/module-venv --prefix $HOME/.local
+</pre></div>
+</div>
+<p>Finally, run python to test the module, as described in <a class="reference internal" href="../stfio/index.html"><span class="doc">The stfio module</span></a>.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../contents.html">
+              <img class="logo" src="../_static/stimfit_128.png" alt="Logo of Stimfit"/>
+            </a></p>
+  <div>
+    <h3><a href="../contents.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Building the Python module only</a><ul>
+<li><a class="reference internal" href="#building-stfio-for-non-default-python-distributions">Building stfio for non-default Python distributions</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="index.html"
+                          title="previous chapter">GNU/Linux Build Guide</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="requirement.html"
+                          title="next chapter">Building Stimfit</a></p>
+  </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../contents.html">
+              <img class="logo" src="../_static/stimfit_128.png" alt="Logo of Stimfit"/>
+            </a></p>
+  <div>
+    <h3><a href="../contents.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Building the Python module only</a><ul>
+<li><a class="reference internal" href="#building-stfio-for-non-default-python-distributions">Building stfio for non-default Python distributions</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="index.html"
+                          title="previous chapter">GNU/Linux Build Guide</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="requirement.html"
+                          title="next chapter">Building Stimfit</a></p>
+  </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2026, Stimfit contributors.
+      Last updated on 29 March, 2026.
+    </div>
+  </body>
+</html>
