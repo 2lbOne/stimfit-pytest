@@ -31,6 +31,7 @@ jobs:
         env:
           # 精确指定仅构建 Python 3.14 的 64 位 Windows 版本
           CIBW_BUILD: cp314-win_amd64
+          CIBW_PRERELEASE_PYTHONS: True
           # (可选) 如果项目需要 vcpkg 或其他外部 C++ 依赖库，可在此注入环境变量
           # CIBW_ENVIRONMENT: "CMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
         run: python -m cibuildwheel --output-dir wheelhouse
