@@ -24,16 +24,19 @@ jobs:
         with:
           python-version: '3.14' 
 
+      - name: Export vcpkg Cache Environment
+        run: echo "VCPKG_DEFAULT_BINARY_CACHE=$env:RUNNER_WORKSPACE\vcpkg_cache" >> $env:GITHUB_ENV
+
       - name: Install build tools and cibuildwheel
         run: python -m pip install --upgrade cibuildwheel
 
       - name: Build wheel for Python 3.14
         env:
-          # 精确指定仅构建 Python 3.14 的 64 位 Windows 版本
           CIBW_BUILD: cp314-win_amd64
           CIBW_PRERELEASE_PYTHONS: True
-          # (可选) 如果项目需要 vcpkg 或其他外部 C++ 依赖库，可在此注入环境变量
-          # CIBW_ENVIRONMENT: "CMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          # 核心修改：将 CMake 参数传递给底层构建系统，激活 vcpkg 清单模式
+          CIBW_ENVIRONMENT: >
+            CMAKE_ARGS="-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -DVCPKG_MANIFEST_MODE=ON"
         run: python -m cibuildwheel --output-dir wheelhouse
 
       - name: Upload Artifacts
