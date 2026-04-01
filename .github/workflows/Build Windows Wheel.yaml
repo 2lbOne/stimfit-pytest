@@ -19,6 +19,14 @@ jobs:
         with:
           submodules: recursive  # 确保拉取可能存在的 C++ 子模块
 
+      - name: Update biosig submodule to correct tag
+        run: |
+          cd src/biosig
+          git fetch --all --tags
+          git checkout v3.9.3
+        shell: bash
+
+        
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
