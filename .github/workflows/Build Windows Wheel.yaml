@@ -60,6 +60,7 @@ jobs:
             delvewheel repair 
             --add-path "D:/a/stimfit-pytest/stimfit-pytest/build/cp314-cp314-win_amd64/src/libstfnum/Release" 
             --add-path "D:/a/stimfit-pytest/stimfit-pytest/build/cp314-cp314-win_amd64/src/libstfio/Release" 
+            --add-path "{project}/build/cp314-cp314-win_amd64/_deps/biosig/build/Release"
             -w {dest_dir} {wheel}
           # 核心修改：将 CMake 参数传递给底层构建系统，激活 vcpkg 清单模式
           
