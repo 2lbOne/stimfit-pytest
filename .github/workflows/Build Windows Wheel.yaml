@@ -22,10 +22,16 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.14' 
+          python-version: '3.13' 
 
-      - name: Export vcpkg Cache Environment
-        run: echo "VCPKG_DEFAULT_BINARY_CACHE=$env:RUNNER_WORKSPACE\vcpkg_cache" >> $env:GITHUB_ENV
+          
+      - name: Setup vcpkg Cache
+        run: |
+          New-Item -ItemType Directory -Force -Path "$env:RUNNER_WORKSPACE\vcpkg_cache"
+          echo "VCPKG_DEFAULT_BINARY_CACHE=$env:RUNNER_WORKSPACE\vcpkg_cache" >> $env:GITHUB_ENV
+        shell: powershell
+        
+  
 
       - name: Install build tools and cibuildwheel
         run: python -m pip install --upgrade cibuildwheel
