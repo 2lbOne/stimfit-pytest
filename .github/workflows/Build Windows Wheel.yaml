@@ -1,0 +1,43 @@
+name: Build Windows Wheel (Python 3.14)
+
+on:
+  push:
+    branches: [ main]
+  workflow_dispatch:
+
+jobs:
+  build-windows-wheels:
+    name: Build stimfit for Python 3.14 on Windows
+    runs-on: windows-latest
+
+    steps:
+      - name: Enable Windows Long Paths
+        run: git config --system core.longpaths true
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive  # 确保拉取可能存在的 C++ 子模块
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14' 
+
+      - name: Install build tools and cibuildwheel
+        run: python -m pip install cibuildwheel==2.17.0
+
+      - name: Build wheel for Python 3.14
+        env:
+          # 精确指定仅构建 Python 3.14 的 64 位 Windows 版本
+          CIBW_BUILD: cp314-win_amd64
+          # (可选) 如果项目需要 vcpkg 或其他外部 C++ 依赖库，可在此注入环境变量
+          # CIBW_ENVIRONMENT: "CMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
+        run: python -m cibuildwheel --output-dir wheelhouse
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: stimfit-windows-py314-wheel
+          path: ./wheelhouse/*.whl
+          retention-days: 14
