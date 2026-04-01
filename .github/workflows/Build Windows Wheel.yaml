@@ -43,15 +43,22 @@ jobs:
   
 
       - name: Install build tools and cibuildwheel
-        run: python -m pip install --upgrade cibuildwheel
+        run: |
+          python -m pip install --upgrade cibuildwheel
+          # 必须安装 delvewheel 用于修复 Windows 下的 DLL 依赖
+          python -m pip install delvewheel
 
       - name: Build wheel for Python 3.14
         env:
           CIBW_BUILD: cp314-win_amd64
           CIBW_PRERELEASE_PYTHONS: True
-          # 核心修改：将 CMake 参数传递给底层构建系统，激活 vcpkg 清单模式
           CIBW_ENVIRONMENT: >
-            CMAKE_ARGS="-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -DVCPKG_MANIFEST_MODE=ON"
+            CMAKE_ARGS="-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -DVCPKG_MANIFEST_MODE=ON -DBUILD_SHARED_LIBS=ON"      
+          # 修改 2: 配置 cibuildwheel 调用 delvewheel 自动修复 .whl 文件，将生成的 stfio.dll 等装入包内
+          CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: "delvewheel repair -w {dest_dir} {wheel}"
+          # 核心修改：将 CMake 参数传递给底层构建系统，激活 vcpkg 清单模式
+          
+          
         run: python -m cibuildwheel --output-dir wheelhouse
 
       - name: Upload Artifacts
