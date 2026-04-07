@@ -1,0 +1,38 @@
+name: new Build stfio (Windows)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install CMake dependencies
+        run: |
+          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
+          choco install hdf5 -y
+          choco install swig -y
+
+      - name: Setup vcpkg dependencies
+        run: |
+          vcpkg install hdf5 fftw3 boost-headers --triplet x64-windows
+          echo "CMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" >> $env:GITHUB_ENV
+
+
+      - name: Build wheel
+        run: python -m pip wheel . --wheel-dir dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stfio-wheel-windows
+          path: dist/*.whl
