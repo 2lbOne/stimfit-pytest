@@ -18,6 +18,18 @@ project(
   LANGUAGES C CXX
 )
 
+# ================= 方案 A：核心修改开始 =================
+# 1. 全局强制构建动态共享库（SHARED），而不是静态库
+#    这会让后续所有未显式指定类型的 add_library 默认生成 .dll
+set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries" FORCE)
+
+# 2. Windows 专用：自动导出所有符号
+#    CMake 会自动生成 .def 文件并处理 dllexport/dllimport，彻底解决 LNK2019
+if(WIN32)
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
+# ================= 方案 A：核心修改结束 =================
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(GNUInstallDirs)
