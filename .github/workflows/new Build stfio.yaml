@@ -22,11 +22,23 @@ jobs:
           git fetch --all --tags
           git checkout v3.9.3
         shell: bash
-        
+
+      - name: Install build tools
+        run: choco install swig -y
+
+      # vcpkg 已预装在 GitHub Actions 的 windows-latest 镜像中
+      # 设置 manifest mode 所需的环境变量
+      - name: Configure vcpkg environment
+        run: |
+          echo "VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT" >> $env:GITHUB_ENV
+          echo "CMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" >> $env:GITHUB_ENV
+
+
+         
       - uses: actions/setup-python@v5
         with:
           python-version: "3.14"
-
+      
       
       - name: Build wheel via pyproject.toml
         run: |
