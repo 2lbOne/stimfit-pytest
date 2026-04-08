@@ -31,14 +31,9 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13' 
+          python-version: '3.14' 
 
-          
-      - name: Setup vcpkg Cache
-        run: |
-          New-Item -ItemType Directory -Force -Path "$env:RUNNER_WORKSPACE\vcpkg_cache"
-          echo "VCPKG_DEFAULT_BINARY_CACHE=$env:RUNNER_WORKSPACE\vcpkg_cache" >> $env:GITHUB_ENV
-        shell: powershell
+
         
   
 
@@ -56,13 +51,7 @@ jobs:
             CMAKE_ARGS="-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -DVCPKG_MANIFEST_MODE=ON -DBUILD_SHARED_LIBS=ON"      
           # 修改 2: 配置 cibuildwheel 调用 delvewheel 自动修复 .whl 文件，将生成的 stfio.dll 等装入包内
           
-          CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: >
-            delvewheel repair 
-            --add-path "D:/a/stimfit-pytest/stimfit-pytest/build/cp314-cp314-win_amd64/src/libstfnum/Release" 
-            --add-path "D:/a/stimfit-pytest/stimfit-pytest/build/cp314-cp314-win_amd64/src/libstfio/Release" 
-            --add-path "{project}/build/cp314-cp314-win_amd64/_deps/biosig/build/Release"
-            -w {dest_dir} {wheel}
-          # 核心修改：将 CMake 参数传递给底层构建系统，激活 vcpkg 清单模式
+
           
           
         run: python -m cibuildwheel --output-dir wheelhouse
