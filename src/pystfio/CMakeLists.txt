@@ -63,7 +63,12 @@ install(FILES
   DESTINATION ${_stfio_install_dir}
   COMPONENT ${STF_COMPONENT_PYTHON}
 )
-
+if(WIN32)
+  install(TARGETS stfio stfnum
+    RUNTIME DESTINATION ${_stfio_install_dir}
+    COMPONENT ${STF_COMPONENT_PYTHON}
+  )
+endif()
 if(BUILD_TESTING)
   add_test(NAME pystfio_unittest COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/unittest_stfio.py)
   set_tests_properties(pystfio_unittest PROPERTIES
